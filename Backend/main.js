@@ -8,6 +8,9 @@ import jwt from 'jsonwebtoken';
 // Import the User model
 import { User } from './models/User.js';
 
+// Import the Blog model
+import {Blog} from './models/Blog.js'
+
 dotenv.config();
 
 const app = express();
@@ -105,6 +108,48 @@ app.get('/profile', authenticateToken, async (req, res) => {
     res.status(500).json({ message: "Error fetching profile data" });
   }
 });
+
+app.post("/create-blog", authenticateToken, async(req,res)=>{
+  try{
+    const {title, subTitle, content} = req.body;
+    const newBlog = new Blog({
+      userId: req.user.id,
+      title,
+      subTitle,
+      content
+    });
+    await newBlog.save();
+    res.status(201).json({message: "Blog created Successfully", blog: newBlog});
+  }catch(error){
+    console.error("Error creating blog", error);
+    res.status(500).json({message: "Error creating blog", error});
+  }
+});
+
+
+app.get("/blog-display", authenticateToken, async (req, res) => {
+  try {
+    console.log("Authenticated user ID:", req.user.id); // Log user ID
+    const blogs = await Blog.find({ userId: req.user.id });
+    console.log("Fetched blogs:", blogs); // Log fetched blogs
+
+    if (!blogs || blogs.length === 0) {
+      return res.status(404).json({ message: "No blogs found for this user" });
+    }
+
+    res.json(
+      blogs.map((blog) => ({
+        title: blog.title,
+        subTitle: blog.subTitle,
+        content: blog.content,
+      }))
+    );
+  } catch (error) {
+    console.error("Error fetching blogs", error);
+    res.status(500).json({ message: "Error fetching blogs" });
+  }
+});
+
 
 // Start the server
 app.listen(port, () => {

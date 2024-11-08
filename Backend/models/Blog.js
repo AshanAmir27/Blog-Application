@@ -4,13 +4,20 @@ import mongoose from 'mongoose';
 const blogSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User', // This links each blog to the User model
+    ref: 'User', // Links each blog to the user who created it
     required: true,
   },
-  blogText: {
+  title: {
     type: String,
     required: true,
-    maxlength: 1000, // Optional: Limit blog text length
+  },
+  subTitle: {
+    type: String,
+    required: true,
+  },
+  content: {
+    type: String,
+    required: true,
   },
   createdAt: {
     type: Date,
